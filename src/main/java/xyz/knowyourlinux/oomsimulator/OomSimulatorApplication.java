@@ -17,13 +17,24 @@ public class OomSimulatorApplication {
 
   private static void consumeMemory() {
 
+    long memoryLimit = Long.parseLong(System.getenv().getOrDefault("MEMORY_LIMIT", "100")); // in megabytes
+    long memoryLimitBytes = memoryLimit * 1024 * 1024;
+
+
     List<byte[]> memoryList = new ArrayList<>();
-    int arraySize = 100 * 1024 * 1024; // 100MB
+    long allocatedMemory = 0;
 
     try {
       while (true) {
-        byte[] memory = new byte[arraySize];
-        memoryList.add(memory);
+        if (allocatedMemory >= memoryLimitBytes) {
+          System.out.println("Memory limit reached.");
+          Thread.sleep(1000);
+          continue;
+        }
+
+        byte[] memoryBlock = new byte[100 * 1024 * 1024]; // Allocate 100MB memory block
+        memoryList.add(memoryBlock);
+        allocatedMemory += memoryBlock.length;
         System.out.println("Allocated " + memoryList.size() * 100 + " MB");
         Thread.sleep(1000);
         printHeapSize();
