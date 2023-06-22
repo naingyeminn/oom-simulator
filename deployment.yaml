@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: oom-simulator
+  name: oom-simulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oom-simulator
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: oom-simulator
+    spec:
+      containers:
+      - image: quay.io/naingyeminn/oom-simulator:1.0.1
+        imagePullPolicy: Always
+        name: oom-simulator
+        env:
+        - name: JAVA_OPTS
+          #value: " -Xmx512m "
+          value: " -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=80 "
+        resources:
+          limits:
+            memory: 2048Mi
+          requests:
+            cpu: 100m
+            memory: 800Mi
