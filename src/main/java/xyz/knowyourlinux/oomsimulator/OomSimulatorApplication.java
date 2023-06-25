@@ -18,6 +18,7 @@ public class OomSimulatorApplication {
   private static void consumeMemory() {
 
     long memoryLimit = Long.parseLong(System.getenv().getOrDefault("MEMORY_LIMIT", "100")); // in megabytes
+    int memoryIncrement = Integer.parseInt(System.getenv().getOrDefault("MEMORY_INCREMENT", "10")); // in megabytes
     long memoryLimitBytes = memoryLimit * 1024 * 1024;
 
 
@@ -32,10 +33,10 @@ public class OomSimulatorApplication {
           continue;
         }
 
-        byte[] memoryBlock = new byte[100 * 1024 * 1024]; // Allocate 100MB memory block
+        byte[] memoryBlock = new byte[memoryIncrement * 1024 * 1024]; // Allocate memory block by MEMORY_INCREMENT
         memoryList.add(memoryBlock);
         allocatedMemory += memoryBlock.length;
-        System.out.println("Allocated " + memoryList.size() * 100 + " MB");
+        System.out.println("Allocated " + memoryList.size() * memoryIncrement + " MB");
         Thread.sleep(1000);
         printHeapSize();
       }
