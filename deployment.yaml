@@ -22,11 +22,14 @@ spec:
         name: oom-simulator
         env:
         - name: JAVA_OPTS
-          #value: " -Xmx512m "
-          value: " -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=80 "
+          value: " -XX:InitialRAMPercentage=25 -XX:MaxRAMPercentage=90 "
+        - name: MEMORY_LIMIT
+          value: "710"
+        - name: MEMORY_INCREMENT
+          value: "5"
         resources:
           limits:
-            memory: 2048Mi
+            memory: 1024Mi
           requests:
             cpu: 100m
-            memory: 800Mi
+            memory: 1024Mi
