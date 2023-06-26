@@ -4,11 +4,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
 
 @SpringBootApplication
 public class OomSimulatorApplication {
 
 	public static void main(String[] args) {
+
 		SpringApplication.run(OomSimulatorApplication.class, args);
 
     printHeapSize();
@@ -17,13 +20,16 @@ public class OomSimulatorApplication {
 
   private static void consumeMemory() {
 
+    boolean runRandomMemoryAllocation = Boolean.parseBoolean(System.getenv().getOrDefault("RANDOM_MEMORY_ALLOCATION", "True"));
     long memoryLimit = Long.parseLong(System.getenv().getOrDefault("MEMORY_LIMIT", "100")); // in megabytes
     int memoryIncrement = Integer.parseInt(System.getenv().getOrDefault("MEMORY_INCREMENT", "10")); // in megabytes
     long memoryLimitBytes = memoryLimit * 1024 * 1024;
-
+    byte[] memoryBlock;
 
     List<byte[]> memoryList = new ArrayList<>();
     long allocatedMemory = 0;
+
+    Random random = new Random();
 
     try {
       while (true) {
@@ -32,12 +38,22 @@ public class OomSimulatorApplication {
           Thread.sleep(1000);
           continue;
         }
+        if (runRandomMemoryAllocation) {
+          int randomIncrement = random.nextInt(memoryIncrement);
+          memoryBlock = new byte[randomIncrement * 1024 * 1024]; // Allocate random memory block
+        } else {
+          memoryBlock = new byte[memoryIncrement * 1024 * 1024]; // Allocate memory block by MEMORY_INCREMENT
+        }
 
-        byte[] memoryBlock = new byte[memoryIncrement * 1024 * 1024]; // Allocate memory block by MEMORY_INCREMENT
         memoryList.add(memoryBlock);
         allocatedMemory += memoryBlock.length;
-        System.out.println("Allocated " + memoryList.size() * memoryIncrement + " MB");
         Thread.sleep(1000);
+
+        if (!memoryList.isEmpty() && runRandomMemoryAllocation) {
+          int index = random.nextInt(memoryList.size());
+          byte[] memoryAllocation = memoryList.remove(index);
+        }
+
         printHeapSize();
       }
     } catch (InterruptedException e) {
@@ -48,6 +64,7 @@ public class OomSimulatorApplication {
       e.printStackTrace();
     }
   }
+
   private static void printHeapSize() {
     Runtime runtime = Runtime.getRuntime();
     long maxMemory = runtime.maxMemory() / 1024 / 1024; // Convert to megabytes
@@ -59,3 +76,4 @@ public class OomSimulatorApplication {
             ", Max: " + maxMemory + "MB");
   }
 }
+
